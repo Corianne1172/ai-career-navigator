@@ -1,0 +1,45 @@
+About the job
+Position Purpose
+
+The Artificial Intelligence (AI) IT Intern assists with the design, development, and deployment of enterprise‑grade artificial intelligence solutions, with a focus on Generative AI, Retrieval‑Augmented Generation (RAG), and agentic AI workflows. This role provides hands‑on experience with applied AI development, backend Application Programming Interface (API) development, cloud deployment, and enterprise data integration.
+
+Essential Functions
+
+Assist in the design, development, testing, and deployment of AI‑powered applications for enterprise use cases, including Generative AI solutions.
+Assist in implementing LLM‑based and agentic AI workflows using LangChain, LangGraph, and/or related design patterns.
+Assist in developing, optimizing, and maintaining Retrieval‑Augmented Generation (RAG) pipelines, including document ingestion, parsing, extraction, indexing, and retrieval.
+Co-build and co-maintain backend APIs and services using.
+Learn to integrate AI applications with enterprise data platforms and systems, including Cosmos Database, structured query language (SQL) server, and internal applications.
+Contribute to prompt engineering, evaluation, and response‑quality improvement initiatives.
+Help support cloud deployment, monitoring, and performance optimization of AI applications in Azure environments.
+Participate in continuous integration (CI)/continuous delivery (CD) pipelines, version control, and release processes using Azure DevOps.
+Collaborate with cross‑functional teams to troubleshoot issues, improve performance, and enhance system scalability.
+Document architectures, workflows, technical decisions, and implementation details to support maintainability and knowledge sharing.
+Follow established security, compliance, and development standards and apply emerging AI and software engineering best practices.
+Other duties as assigned.
+
+Education and Training
+
+Must be a current enrolled student or recent graduate in a computer science, AI, IT, or related technical program.
+Must have a minimum grade point average (GPA) of 3.0 on a 4.0 scale.
+Coursework or hands-on experience in software development or programming is essential.
+
+Minimum Qualifications
+
+Strong interest in applied AI and software development within an enterprise environment is necessary.
+Strong foundation in Python programming, gained through coursework, projects, internships, and/or self‑study is essential.
+Basic understanding of backend development and APIs, including how services communicate, and exchange data is required.
+Foundational knowledge of Generative AI concepts, including large language models (LLMs) and prompt engineering is crucial.
+Exposure to databases, including relational databases and/or NoSQL databases is necessary.
+Interest in cloud‑native development and AI system deployment, preferably within Microsoft Azure or a comparable platform is required.
+Basic exposure to development workflows, such as version control and CI/CD concepts is essential.
+Strong analytical, communication, and problem‑solving skills, with the ability to collaborate effectively in a team environment is required.
+Demonstrated willingness to learn and adapt to new technologies and best practices are necessary.
+
+We are an Equal Opportunity Employer. All qualified applicants will receive consideration for employment without regard to race, color, religion, sex, national origin, disability, protected veteran status, or other characteristics protected by law.
+
+, We offer a full complement of benefits that include medical, dental, and vision insurance; life, travel, and disability insurance; a flexible spending account; 401K plans; a pension plan; paid holidays and vacation. We also offer financial assistance programs if you decide to adopt a child or want to pursue further education. We have a comprehensive wellness program and an Employee Assistance Program, that supports individuals in the proactive management of their overall health and wellness., $19.00-23.00 per hour
+
+Benefits found in job post
+
+401(k), Vision insurance, Pension plan, Disability insurance
