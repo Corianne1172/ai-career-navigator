@@ -2,7 +2,7 @@ from llama_cpp import Llama
 
 model_path = "/Users/otiohkonan/.cache/huggingface/hub/models--microsoft--Phi-3-mini-4k-instruct-gguf/snapshots/a64113399c2f6b8ad3e11c394733a2ddadaa7f33/Phi-3-mini-4k-instruct-q4.gguf"
 
-llm = Llama(model_path=model_path, n_ctx=4096, n_gpu_layers=-1)
+llm = Llama(model_path=model_path, n_ctx=4096, n_gpu_layers=-1, verbose=False)
 
 def extract_skills(text, label="resume"):
     prompt = f"""Extract the technical skills from this {label}. List them as a comma-separated list, nothing else.
@@ -12,7 +12,7 @@ def extract_skills(text, label="resume"):
 
 SKILLS:"""
 
-    response = llm.create_completion(prompt, max_tokens=200, stop=["\n\n"])
+    response = llm.create_completion(prompt, max_tokens=400)
     return response["choices"][0]["text"].strip()
 
 if __name__ == "__main__":
