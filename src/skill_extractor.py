@@ -5,7 +5,7 @@ model_path = "/Users/otiohkonan/.cache/huggingface/hub/models--microsoft--Phi-3-
 llm = Llama(model_path=model_path, n_ctx=4096, n_gpu_layers=-1, verbose=False)
 
 def extract_skills(text, label="resume"):
-    prompt = f"""Extract the technical skills from this {label}. List them as a comma-separated list, nothing else.
+    prompt = f"""Extract the technical skills from this {label}. Output only the comma-separated list, no other text, no notes, no labels. Example: Python, SQL, Machine Learning. Do not use bullet points or dashes. 
 
 {label.upper()}:
 {text[:2000]}
@@ -15,6 +15,19 @@ SKILLS:"""
     response = llm.create_completion(prompt, max_tokens=400)
     return response["choices"][0]["text"].strip()
 
+def clean_skills_output(skills_output):
+    cleaned = skills_output.split("- [Support]:")[0].strip()
+    cleaned = cleaned.split("[response]:")[0].strip()
+    if cleaned.startswith("- output:"):
+        cleaned = cleaned.replace("- output:", "", 1).strip()
+    if "," not in cleaned:
+        lines = [line.strip("- ").strip() for line in cleaned.split("\n") 
+                 if line.strip() and not line.strip().startswith("[") and not line.strip().startswith("output:")]
+        cleaned = ", ".join(lines)
+    else:
+        cleaned = cleaned.split("\n")[0]
+    return cleaned.strip()
+
 if __name__ == "__main__":
     from parser import extract_text_from_pdf, load_job_description
     
@@ -22,6 +35,6 @@ if __name__ == "__main__":
     jd_text = load_job_description("../data/AI_Intern_job_description.txt")
     
     print("Resume skills:")
-    print(extract_skills(resume_text, "resume"))
+    print(clean_skills_output(extract_skills(resume_text, "resume")))
     print("\nJob description skills:")
-    print(extract_skills(jd_text, "job description"))
+    print(clean_skills_output(extract_skills(jd_text, "job description")))
