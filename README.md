@@ -25,14 +25,19 @@ ESCO data is not tracked in this repo due to file size. Download the CSV bundle 
 
 ## Project structure
 
-src/
-  parser.py - resume/JD text extraction
-  matcher.py - embedding-based matching
-  skill_extractor.py - ESCO-based skill extraction
-  job_api.py - Adzuna API integration
-data/
-  ESCO/ - skills taxonomy (not tracked, see Setup)
-  Testing/ - sample resume/JD for testing
+ai-career-navigator/
+├── src/
+│   ├── parser.py           # resume/JD text extraction
+│   ├── matcher.py          # embedding-based matching
+│   ├── skill_extractor.py  # ESCO-based skill extraction
+│   ├── job_api.py          # Adzuna API integration
+│   └── test_dataset.py     # dataset loading/testing
+├── data/
+│   ├── ESCO/                # skills taxonomy (not tracked, see Setup)
+│   └── Testing/              # sample resume/JD for testing
+├── notebooks/                 # exploratory notebooks
+├── requirements.txt
+└── README.md
 
 ## Author
 
