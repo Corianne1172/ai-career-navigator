@@ -43,6 +43,7 @@
 
 import pandas as pd
 from flashtext import KeywordProcessor
+from parser import extract_text_from_pdf, load_job_description
 
 def build_keyword_index(df):
     keyword_index = []
@@ -62,20 +63,21 @@ def build_flashtext_index(keyword_index):
 def extract_esco_skills_fast(text, kp):
     return list(set(kp.extract_keywords(text)))
 
+def uri_to_label(keyword_index):
+    return {entry['conceptUri']: entry['labels'][0] for entry in keyword_index}
+
 if __name__ == "__main__":
     df = pd.read_csv("../data/ESCO/skills_en.csv")
     keyword_index = build_keyword_index(df)
     kp = build_flashtext_index(keyword_index)
     
-    from parser import extract_text_from_pdf, load_job_description
     resume_text = extract_text_from_pdf("../data/Testing/OtiohKonan_Resume_AI_June2026.pdf")
     jd_text = load_job_description("../data/Testing/AI_Intern_job_description.txt")
 
     resume_skills = extract_esco_skills_fast(resume_text, kp)
     jd_skills = extract_esco_skills_fast(jd_text, kp)
 
-    uri_to_label = {entry['conceptUri']: entry['labels'][0] for entry in keyword_index}
-
-    print("Resume skills:", [uri_to_label[u] for u in resume_skills])
-    print("JD skills:", [uri_to_label[u] for u in jd_skills])
-    
+    label_map = uri_to_label(keyword_index)
+    print("Resume skills:", [label_map[u] for u in resume_skills])
+    print("JD skills:", [label_map[u] for u in jd_skills])
+     
