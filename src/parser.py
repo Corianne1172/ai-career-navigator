@@ -14,7 +14,7 @@ def load_job_description(job_description_path):
     return job_description
 
 if __name__ == "__main__":
-    my_resume = extract_text_from_pdf("../data/OtiohKonan_Resume_AI_June2026.pdf")
+    my_resume = extract_text_from_pdf("../data/Testing/OtiohKonan_Resume_AI_June2026.pdf")
     print(my_resume)
-    job_description = load_job_description("../data/AI_Intern_job_description.txt")
+    job_description = load_job_description("../data/Testing/AI_Intern_job_description.txt")
     print(job_description)
