@@ -18,11 +18,17 @@ def compute_skill_gap(resume_skill_uris, jd_skill_uris, uri_to_label, model, thr
     max_indices = max_result.indices
     for i, jd_skill in enumerate(jd_skills):
         if max_similarities[i] < threshold:
-            skill_gap.append(jd_skill)
+            skill_gap.append((jd_skill, max_similarities[i].item()))
         else:
-            matched_skills.append((jd_skill, resume_skills[max_indices[i]]))
+            matched_skills.append((jd_skill, resume_skills[max_indices[i]], max_similarities[i].item()))
     return skill_gap, matched_skills
-    
+
+def compute_skills_score(skill_gap, matched_skills):
+    if not skill_gap and not matched_skills:
+        return 0.0
+    skills_score = sum(score for _, score in skill_gap) + sum(score for _, _, score in matched_skills)
+    skills_score /= (len(skill_gap) + len(matched_skills))
+    return skills_score
 
 if __name__ == "__main__":
     model = SentenceTransformer("all-MiniLM-L6-v2")
