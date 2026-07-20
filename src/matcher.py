@@ -85,6 +85,22 @@ def compute_education_score(resume_education_text, jd_education_text, model, gpa
 
     return education_score, list(zip(jd_lines, max_similarities.tolist()))
 
+def compute_composite_score(skills_score, experience_score, education_score, 
+                              weights=(0.5, 0.3, 0.2)):
+    skills_weight, experience_weight, education_weight = weights
+    composite = (skills_score * skills_weight + 
+                 experience_score * experience_weight + 
+                 education_score * education_weight)
+    
+    if composite >= 0.80:
+        band = "Excellent"
+    elif composite >= 0.55:
+        band = "Good"
+    else:
+        band = "Needs Improvement"
+    
+    return composite, band
+
 if __name__ == "__main__":
     model = SentenceTransformer("all-MiniLM-L6-v2")
     resume_text = extract_text_from_pdf("../data/Testing/OtiohKonan_Resume_AI_June2026.pdf")
@@ -129,6 +145,10 @@ if __name__ == "__main__":
     education_score, education_matches = compute_education_score(resume_education_text, jd_education_text, model)
     print("Education score:", education_score)
     print("Education matches:", education_matches)
+    
+    composite_score, band = compute_composite_score(skills_score, experience_score, education_score)
+    print("Composite score:", composite_score)
+    print("Band:", band)
 
     # resume_embedding = model.encode(resume_text)
     # job_description_embedding = model.encode(job_description_text)
