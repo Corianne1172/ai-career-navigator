@@ -2,7 +2,7 @@
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 from sentence_transformers.util import cos_sim
-from parser import extract_text_from_pdf, load_job_description
+from parser import extract_text_from_pdf, load_job_description, split_resume_sections, split_jd_sections 
 from skill_extractor import build_keyword_index, build_flashtext_index, uri_to_label, extract_esco_skills_fast
 
 def compute_skill_gap(resume_skill_uris, jd_skill_uris, uri_to_label, model, threshold=0.65):
@@ -30,22 +30,58 @@ def compute_skills_score(skill_gap, matched_skills):
     skills_score /= (len(skill_gap) + len(matched_skills))
     return skills_score
 
+def compute_experience_score(resume_experience_text, jd_responsibilities_text, model, threshold=0.5):
+    resume_lines = [line.strip() for line in resume_experience_text.splitlines() if line.strip()]
+    jd_lines = [line.strip() for line in jd_responsibilities_text.splitlines() if line.strip()]
+
+    if not resume_lines or not jd_lines:
+        return 0.0
+
+    resume_embeddings = model.encode(resume_lines)
+    jd_embeddings = model.encode(jd_lines)
+
+    similarity_matrix = cos_sim(jd_embeddings, resume_embeddings)
+    max_similarities = similarity_matrix.max(dim=1).values
+
+    experience_score = max_similarities.sum().item() / len(jd_lines)
+    return experience_score, list(zip(jd_lines, max_similarities.tolist()))
+
 if __name__ == "__main__":
     model = SentenceTransformer("all-MiniLM-L6-v2")
     resume_text = extract_text_from_pdf("../data/Testing/OtiohKonan_Resume_AI_June2026.pdf")
     job_description_text = load_job_description("../data/Testing/AI_Intern_job_description.txt")
 
+    # ESCO skill extraction
     df = pd.read_csv("../data/ESCO/skills_en.csv")
     keyword_index = build_keyword_index(df)
     kp = build_flashtext_index(keyword_index)
-    
+
     resume_skill_uris = extract_esco_skills_fast(resume_text, kp)
     jd_skill_uris = extract_esco_skills_fast(job_description_text, kp)
-    
+
     label_map = uri_to_label(keyword_index)
     skill_gap, matched_skills = compute_skill_gap(resume_skill_uris, jd_skill_uris, label_map, model)
-    print("Skill gap:", skill_gap)
-    print("Matched skills:", matched_skills)
+    skills_score = compute_skills_score(skill_gap, matched_skills)
+    print("Skills score:", skills_score)
+
+    # Section segmentation
+    resume_headers = ["Education", "Experience", "Projects", "Skills", "Honors, Achievements & Activities"]
+    sections = split_resume_sections(resume_text, resume_headers)
+
+    jd_keywords = {
+        "qualifications": ["qualification", "requirement", "must have", "you have", "who you are"],
+        "responsibilities": ["responsibilit", "essential function", "what you'll do", "duties"],
+        "education": ["education", "degree"]
+    }
+    jd_sections = split_jd_sections(job_description_text, jd_keywords)
+
+    # Experience score
+    resume_experience_text = sections.get("Experience", "") + "\n" + sections.get("Projects", "")
+    jd_responsibilities_text = jd_sections.get("responsibilities", "")
+
+    experience_score, experience_matches = compute_experience_score(resume_experience_text, jd_responsibilities_text, model)
+    print("Experience score:", experience_score)
+    print("Experience matches:", experience_matches)
     
     # resume_embedding = model.encode(resume_text)
     # job_description_embedding = model.encode(job_description_text)
