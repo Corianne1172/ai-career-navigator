@@ -5,6 +5,7 @@ from sentence_transformers import SentenceTransformer
 from sentence_transformers.util import cos_sim
 from parser import extract_text_from_pdf, load_job_description, split_resume_sections, split_jd_sections 
 from skill_extractor import build_keyword_index, build_flashtext_index, uri_to_label, extract_esco_skills_fast
+from llama_cpp import Llama
 
 def compute_skill_gap(resume_skill_uris, jd_skill_uris, uri_to_label, model, threshold=0.65):
     resume_skills = [uri_to_label[uri] for uri in resume_skill_uris if uri in uri_to_label]
@@ -101,6 +102,19 @@ def compute_composite_score(skills_score, experience_score, education_score,
     
     return composite, band
 
+def generate_gap_report(skill_gap, llm, max_gaps=10):
+    gap_names = [name for name, score in skill_gap][:max_gaps]
+    gap_list_text = ", ".join(gap_names)
+
+    prompt = f"""Based on this list of missing skills for a job application, write a short, encouraging paragraph (3-4 sentences) explaining what the candidate should focus on next. Do not repeat the list verbatim, synthesize it into practical advice.
+
+Missing skills: {gap_list_text}
+
+Advice:"""
+
+    response = llm.create_completion(prompt, max_tokens=200)
+    return response["choices"][0]["text"].strip()
+
 if __name__ == "__main__":
     model = SentenceTransformer("all-MiniLM-L6-v2")
     resume_text = extract_text_from_pdf("../data/Testing/OtiohKonan_Resume_AI_June2026.pdf")
@@ -149,7 +163,13 @@ if __name__ == "__main__":
     composite_score, band = compute_composite_score(skills_score, experience_score, education_score)
     print("Composite score:", composite_score)
     print("Band:", band)
+    
+    
+    model_path = "/Users/otiohkonan/.cache/huggingface/hub/models--microsoft--Phi-3-mini-4k-instruct-gguf/snapshots/a64113399c2f6b8ad3e11c394733a2ddadaa7f33/Phi-3-mini-4k-instruct-q4.gguf"
+    llm = Llama(model_path=model_path, n_ctx=4096, n_gpu_layers=-1, verbose=False)
 
+    gap_report = generate_gap_report(skill_gap, llm)
+    print("Gap report:", gap_report)
     # resume_embedding = model.encode(resume_text)
     # job_description_embedding = model.encode(job_description_text)
     # cosine_similarity = cos_sim(resume_embedding, job_description_embedding)
