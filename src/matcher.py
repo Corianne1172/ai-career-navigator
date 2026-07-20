@@ -1,5 +1,6 @@
 # import chromadb
 import pandas as pd
+import re
 from sentence_transformers import SentenceTransformer
 from sentence_transformers.util import cos_sim
 from parser import extract_text_from_pdf, load_job_description, split_resume_sections, split_jd_sections 
@@ -46,6 +47,44 @@ def compute_experience_score(resume_experience_text, jd_responsibilities_text, m
     experience_score = max_similarities.sum().item() / len(jd_lines)
     return experience_score, list(zip(jd_lines, max_similarities.tolist()))
 
+def extract_gpa(resume_education_text, scale=4.0):
+    match = re.search(r"GPA:\s*([\d.]+)", resume_education_text)
+    if not match:
+        return None
+    gpa = float(match.group(1))
+    return min(gpa / scale, 1.0)
+
+def compute_education_score(resume_education_text, jd_education_text, model, gpa_bonus_weight=0.1):
+    resume_lines = []
+    for line in resume_education_text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        if "," in line:
+            resume_lines.extend([chunk.strip() for chunk in line.split(",") if chunk.strip()])
+        else:
+            resume_lines.append(line)
+
+    jd_lines = [line.strip() for line in jd_education_text.splitlines() if line.strip()]
+
+    if not resume_lines or not jd_lines:
+        return 0.0, []
+
+    resume_embeddings = model.encode(resume_lines)
+    jd_embeddings = model.encode(jd_lines)
+
+    similarity_matrix = cos_sim(jd_embeddings, resume_embeddings)
+    max_similarities = similarity_matrix.max(dim=1).values
+
+    education_score = max_similarities.sum().item() / len(jd_lines)
+
+    gpa_normalized = extract_gpa(resume_education_text)
+    if gpa_normalized is not None:
+        education_score += gpa_bonus_weight * gpa_normalized
+        education_score = min(education_score, 1.0)
+
+    return education_score, list(zip(jd_lines, max_similarities.tolist()))
+
 if __name__ == "__main__":
     model = SentenceTransformer("all-MiniLM-L6-v2")
     resume_text = extract_text_from_pdf("../data/Testing/OtiohKonan_Resume_AI_June2026.pdf")
@@ -82,7 +121,15 @@ if __name__ == "__main__":
     experience_score, experience_matches = compute_experience_score(resume_experience_text, jd_responsibilities_text, model)
     print("Experience score:", experience_score)
     print("Experience matches:", experience_matches)
-    
+
+    # Education score
+    resume_education_text = sections.get("Education", "")
+    jd_education_text = jd_sections.get("education", "")
+
+    education_score, education_matches = compute_education_score(resume_education_text, jd_education_text, model)
+    print("Education score:", education_score)
+    print("Education matches:", education_matches)
+
     # resume_embedding = model.encode(resume_text)
     # job_description_embedding = model.encode(job_description_text)
     # cosine_similarity = cos_sim(resume_embedding, job_description_embedding)
