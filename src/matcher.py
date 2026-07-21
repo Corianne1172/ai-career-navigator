@@ -115,6 +115,22 @@ Advice:"""
     response = llm.create_completion(prompt, max_tokens=200, stop=["<|assistant|>", "<|end|>", "<|user|>"])
     return response["choices"][0]["text"].strip()
 
+def generate_interview_questions(matched_skills, skill_gap, llm, num_questions=5):
+    matched_names = [name for name, _, _ in matched_skills][:5]
+    gap_names = [name for name, _ in skill_gap][:5]
+
+    prompt = f"""Generate {num_questions} interview questions for a candidate based on their skills and the job they're applying for.
+
+Skills the candidate has that match the job: {", ".join(matched_names)}
+Skills the job requires that the candidate's resume doesn't show: {", ".join(gap_names)}
+
+Write a numbered list of {num_questions} interview questions. Mix technical questions about their matched skills with questions that probe whether they have hidden experience with the gap skills. Do not include explanations, just the numbered list.
+
+Questions:"""
+
+    response = llm.create_completion(prompt, max_tokens=400, stop=["<|assistant|>", "<|end|>", "<|user|>"])
+    return response["choices"][0]["text"].strip()
+
 if __name__ == "__main__":
     model = SentenceTransformer("all-MiniLM-L6-v2")
     resume_text = extract_text_from_pdf("../data/Testing/OtiohKonan_Resume_AI_June2026.pdf")
@@ -170,6 +186,9 @@ if __name__ == "__main__":
 
     gap_report = generate_gap_report(skill_gap, llm)
     print("Gap report:", gap_report)
+    
+    interview_questions = generate_interview_questions(matched_skills, skill_gap, llm)
+    print("Interview questions:", interview_questions)
     # resume_embedding = model.encode(resume_text)
     # job_description_embedding = model.encode(job_description_text)
     # cosine_similarity = cos_sim(resume_embedding, job_description_embedding)
