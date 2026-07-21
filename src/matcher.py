@@ -112,7 +112,7 @@ Missing skills: {gap_list_text}
 
 Advice:"""
 
-    response = llm.create_completion(prompt, max_tokens=200)
+    response = llm.create_completion(prompt, max_tokens=200, stop=["<|assistant|>", "<|end|>", "<|user|>"])
     return response["choices"][0]["text"].strip()
 
 if __name__ == "__main__":
