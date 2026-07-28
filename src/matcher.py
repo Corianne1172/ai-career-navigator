@@ -128,8 +128,12 @@ Write a numbered list of {num_questions} interview questions. Mix technical ques
 
 Questions:"""
 
-    response = llm.create_completion(prompt, max_tokens=400, stop=["<|assistant|>", "<|end|>", "<|user|>"])
-    return response["choices"][0]["text"].strip()
+    response = llm.create_completion(prompt, max_tokens=700, stop=["<|assistant|>", "<|end|>", "<|user|>"])
+    text = response["choices"][0]["text"].strip()
+
+    matches = re.findall(r'\d+\.\s.*?(?=\n\d+\.|\Z)', text, re.DOTALL)
+    trimmed = matches[:num_questions]
+    return "\n\n".join(m.strip() for m in trimmed)
 
 if __name__ == "__main__":
     model = SentenceTransformer("all-MiniLM-L6-v2")
