@@ -24,3 +24,9 @@ for i in range(5):
     print('---')
     
     
+df_resumes = pd.read_csv("../data/archive/Resume/Resume.csv")
+print(df_resumes.columns)
+print(df_resumes.shape)
+print(df_resumes.head(3))
+    
+    

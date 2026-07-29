@@ -37,7 +37,7 @@ def compute_experience_score(resume_experience_text, jd_responsibilities_text, m
     jd_lines = [line.strip() for line in jd_responsibilities_text.splitlines() if line.strip()]
 
     if not resume_lines or not jd_lines:
-        return 0.0
+        return 0.0, []
 
     resume_embeddings = model.encode(resume_lines)
     jd_embeddings = model.encode(jd_lines)
