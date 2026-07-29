@@ -21,8 +21,14 @@ def run_pipeline_on_resume(resume_text, jd_text, jd_sections, model, kp, label_m
         skills_score, skill_gap, matched_skills = 0.0, [], []
 
     try:
-        resume_headers = ["Education", "Experience", "Projects", "Skills", "Honors, Achievements & Activities"]
-        sections = split_resume_sections(resume_text, resume_headers)
+        header_map = {
+            "Education": ["Education", "Education and Training"],
+            "Experience": ["Experience", "Work Experience", "Professional Experience"],
+            "Projects": ["Projects"],
+            "Skills": ["Skills", "Summary of Skills"],
+            "Honors": ["Honors, Achievements & Activities", "Activities", "Honors and Accomplishments"]
+        }
+        sections = split_resume_sections(resume_text, header_map)
 
         resume_experience_text = sections.get("Experience", "") + "\n" + sections.get("Projects", "")
         jd_responsibilities_text = jd_sections.get("responsibilities", "")
@@ -88,7 +94,7 @@ if __name__ == "__main__":
         result['filename'] = filename
         results.append(result)
         print(f"{filename}: composite={result['composite_score']:.2f} band={result['band']} errors={result['errors']}")
-        
+
     for r in results:
         if r['filename'] in ['40018190.pdf', '52246737.pdf']:
             print(f"\n--- {r['filename']} ---")

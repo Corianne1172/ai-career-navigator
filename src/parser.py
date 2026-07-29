@@ -9,23 +9,32 @@ def extract_text_from_pdf(pdf_path):
     return pdf_parsed
     
     
-def split_resume_sections(text, headers):
-    sections = {}
-    current_header = None
+def split_resume_sections(text, header_map):
+    sections = {category: [] for category in header_map}
+    current_category = None
+    matched_categories_seen = set()
+
     for line in text.splitlines():
         line = line.strip()
         if not line:
             continue
-        if any(header.lower() == line.lower() for header in headers):
-            matched_header = next((header for header in headers if header.lower() == line.lower()), None)
-            if matched_header not in sections:
-                current_header = matched_header
-                sections[current_header] = []
+
+        matched_category = None
+        for category, synonyms in header_map.items():
+            if any(synonym.lower() == line.lower() for synonym in synonyms):
+                matched_category = category
+                break
+
+        if matched_category:
+            if matched_category not in matched_categories_seen:
+                current_category = matched_category
+                matched_categories_seen.add(matched_category)
             else:
-                current_header = None
-        elif current_header:
-            sections[current_header].append(line)
-    return {header: "\n".join(lines) for header, lines in sections.items()}
+                current_category = None
+        elif current_category:
+            sections[current_category].append(line)
+
+    return {category: "\n".join(lines) for category, lines in sections.items()}
 
 def load_job_description(job_description_path):
     with open(job_description_path, 'r') as file:
@@ -70,8 +79,14 @@ def split_jd_sections(text, keyword_map, max_header_words=8, stop_markers=None):
 if __name__ == "__main__":
     print("Resume Sections:\n")
     my_resume = extract_text_from_pdf("../data/Testing/OtiohKonan_Resume_AI_June2026.pdf")
-    headers = ["Education", "Experience", "Projects", "Skills", "Honors, Achievements & Activities"]
-    sections = split_resume_sections(my_resume, headers)
+    header_map = {
+        "Education": ["Education", "Education and Training"],
+        "Experience": ["Experience", "Work Experience", "Professional Experience"],
+        "Projects": ["Projects"],
+        "Skills": ["Skills", "Summary of Skills"],
+        "Honors": ["Honors, Achievements & Activities", "Activities", "Honors and Accomplishments"]
+    }
+    sections = split_resume_sections(my_resume, header_map)
     for header, content in sections.items():
         print(f"{header}:")
         print(content)

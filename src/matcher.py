@@ -154,8 +154,14 @@ if __name__ == "__main__":
     print("Skills score:", skills_score)
 
     # Section segmentation
-    resume_headers = ["Education", "Experience", "Projects", "Skills", "Honors, Achievements & Activities"]
-    sections = split_resume_sections(resume_text, resume_headers)
+    header_map = {
+        "Education": ["Education", "Education and Training"],
+        "Experience": ["Experience", "Work Experience", "Professional Experience"],
+        "Projects": ["Projects"],
+        "Skills": ["Skills", "Summary of Skills"],
+        "Honors": ["Honors, Achievements & Activities", "Activities", "Honors and Accomplishments"]
+    }
+    sections = split_resume_sections(resume_text, header_map)
 
     jd_keywords = {
         "qualifications": ["qualification", "requirement", "must have", "you have", "who you are"],
