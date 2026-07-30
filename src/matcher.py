@@ -6,6 +6,7 @@ from sentence_transformers.util import cos_sim
 from parser import extract_text_from_pdf, load_job_description, split_resume_sections, split_jd_sections 
 from skill_extractor import build_keyword_index, build_flashtext_index, uri_to_label, extract_esco_skills_fast
 from llama_cpp import Llama
+from config import RESUME_HEADER_MAP, JD_KEYWORD_MAP
 
 def compute_skill_gap(resume_skill_uris, jd_skill_uris, uri_to_label, model, threshold=0.65):
     resume_skills = [uri_to_label[uri] for uri in resume_skill_uris if uri in uri_to_label]
@@ -154,21 +155,9 @@ if __name__ == "__main__":
     print("Skills score:", skills_score)
 
     # Section segmentation
-    header_map = {
-        "Education": ["Education", "Education and Training"],
-        "Experience": ["Experience", "Work Experience", "Professional Experience"],
-        "Projects": ["Projects"],
-        "Skills": ["Skills", "Summary of Skills"],
-        "Honors": ["Honors, Achievements & Activities", "Activities", "Honors and Accomplishments"]
-    }
-    sections = split_resume_sections(resume_text, header_map)
 
-    jd_keywords = {
-        "qualifications": ["qualification", "requirement", "must have", "you have", "who you are"],
-        "responsibilities": ["responsibilit", "essential function", "what you'll do", "duties"],
-        "education": ["education", "degree"]
-    }
-    jd_sections = split_jd_sections(job_description_text, jd_keywords)
+    sections = split_resume_sections(resume_text, RESUME_HEADER_MAP)
+    jd_sections = split_jd_sections(job_description_text, JD_KEYWORD_MAP)
 
     # Experience score
     resume_experience_text = sections.get("Experience", "") + "\n" + sections.get("Projects", "")

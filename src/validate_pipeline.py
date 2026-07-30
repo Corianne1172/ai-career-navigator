@@ -7,6 +7,7 @@ from parser import load_job_description, split_resume_sections, split_jd_section
 from skill_extractor import build_keyword_index, build_flashtext_index, extract_esco_skills_fast, uri_to_label
 from matcher import (compute_skill_gap, compute_skills_score, compute_experience_score,
                       compute_education_score, compute_composite_score)
+from config import RESUME_HEADER_MAP, JD_KEYWORD_MAP
 
 def run_pipeline_on_resume(resume_text, jd_text, jd_sections, model, kp, label_map):
     errors = []
@@ -21,14 +22,7 @@ def run_pipeline_on_resume(resume_text, jd_text, jd_sections, model, kp, label_m
         skills_score, skill_gap, matched_skills = 0.0, [], []
 
     try:
-        header_map = {
-            "Education": ["Education", "Education and Training"],
-            "Experience": ["Experience", "Work Experience", "Professional Experience"],
-            "Projects": ["Projects"],
-            "Skills": ["Skills", "Summary of Skills"],
-            "Honors": ["Honors, Achievements & Activities", "Activities", "Honors and Accomplishments"]
-        }
-        sections = split_resume_sections(resume_text, header_map)
+        sections = split_resume_sections(resume_text, RESUME_HEADER_MAP)
 
         resume_experience_text = sections.get("Experience", "") + "\n" + sections.get("Projects", "")
         jd_responsibilities_text = jd_sections.get("responsibilities", "")
@@ -71,12 +65,7 @@ if __name__ == "__main__":
     label_map = uri_to_label(keyword_index)
 
     jd_text = load_job_description("../data/Testing/AI_Intern_job_description.txt")
-    jd_keywords = {
-        "qualifications": ["qualification", "requirement", "must have", "you have", "who you are"],
-        "responsibilities": ["responsibilit", "essential function", "what you'll do", "duties"],
-        "education": ["education", "degree"]
-    }
-    jd_sections = split_jd_sections(jd_text, jd_keywords)
+    jd_sections = split_jd_sections(jd_text, JD_KEYWORD_MAP)
 
     resume_folder = "../data/archive/data/data/INFORMATION-TECHNOLOGY"
     resume_files = [f for f in os.listdir(resume_folder) if f.endswith(".pdf")][:15]

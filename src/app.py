@@ -9,6 +9,7 @@ from matcher import (compute_skill_gap, compute_skills_score, compute_experience
                       compute_education_score, compute_composite_score, generate_gap_report,
                       generate_interview_questions)
 from course_recommender import build_course_index, recommend_courses
+from config import RESUME_HEADER_MAP, JD_KEYWORD_MAP
 
 @st.cache_resource
 def load_model():
@@ -50,16 +51,9 @@ if st.button("Analyze") and resume_file and jd_text:
         jd_skill_uris = extract_esco_skills_fast(jd_text, kp)
         skill_gap, matched_skills = compute_skill_gap(resume_skill_uris, jd_skill_uris, label_map, model)
         skills_score = compute_skills_score(skill_gap, matched_skills)
-
-        resume_headers = ["Education", "Experience", "Projects", "Skills", "Honors, Achievements & Activities"]
-        sections = split_resume_sections(resume_text, resume_headers)
-
-        jd_keywords = {
-            "qualifications": ["qualification", "requirement", "must have", "you have", "who you are"],
-            "responsibilities": ["responsibilit", "essential function", "what you'll do", "duties"],
-            "education": ["education", "degree"]
-        }
-        jd_sections = split_jd_sections(jd_text, jd_keywords)
+        
+        sections = split_resume_sections(resume_text, RESUME_HEADER_MAP)
+        jd_sections = split_jd_sections(jd_text, JD_KEYWORD_MAP)
 
         resume_experience_text = sections.get("Experience", "") + "\n" + sections.get("Projects", "")
         jd_responsibilities_text = jd_sections.get("responsibilities", "")
