@@ -49,11 +49,12 @@ def compute_experience_score(resume_experience_text, jd_responsibilities_text, m
     experience_score = max_similarities.sum().item() / len(jd_lines)
     return experience_score, list(zip(jd_lines, max_similarities.tolist()))
 
-def extract_gpa(resume_education_text, scale=4.0):
-    match = re.search(r"GPA:\s*([\d.]+)", resume_education_text)
+def extract_gpa(resume_education_text, default_scale=4.0):
+    match = re.search(r"GPA:\s*([\d.]+)\s*(?:/\s*([\d.]+))?", resume_education_text)
     if not match:
         return None
     gpa = float(match.group(1))
+    scale = float(match.group(2)) if match.group(2) else default_scale
     return min(gpa / scale, 1.0)
 
 def compute_education_score(resume_education_text, jd_education_text, model, gpa_bonus_weight=0.1):
