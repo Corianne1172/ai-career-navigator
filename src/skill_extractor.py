@@ -10,7 +10,6 @@
 #     prompt = f"""Extract the technical skills from this {label}. Output only the comma-separated list, no other text, no notes, no labels. Example: Python, SQL, Machine Learning. Do not use bullet points or dashes. 
 
 # {label.upper()}:
-# {text[:2000]}
 
 # SKILLS:"""
 
