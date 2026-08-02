@@ -65,8 +65,19 @@ def extract_esco_skills_fast(text, kp):
 def uri_to_label(keyword_index):
     return {entry['conceptUri']: entry['labels'][0] for entry in keyword_index}
 
+def debug_extract(text, kp):
+    matches = kp.extract_keywords(text, span_info=True)
+    for uri, start, end in matches:
+        print(f"URI: {uri} | Matched text: '{text[start:end]}'")
+
 if __name__ == "__main__":
     df = pd.read_csv("../data/ESCO/skills_en.csv")
+    
+    matches = df[df['altLabels'].str.contains('parsing', case=False, na=False)]
+    for _, row in matches.iterrows():
+        print(row['conceptUri'], '->', row['preferredLabel'], '| altLabels:', row['altLabels'])
+    
+    
     keyword_index = build_keyword_index(df)
     kp = build_flashtext_index(keyword_index)
     
@@ -79,4 +90,6 @@ if __name__ == "__main__":
     label_map = uri_to_label(keyword_index)
     print("Resume skills:", [label_map[u] for u in resume_skills])
     print("JD skills:", [label_map[u] for u in jd_skills])
+    
+    debug_extract(jd_text, kp)
      
