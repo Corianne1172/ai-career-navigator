@@ -11,6 +11,10 @@ from config import RESUME_HEADER_MAP, JD_KEYWORD_MAP
 def compute_skill_gap(resume_skill_uris, jd_skill_uris, uri_to_label, model, threshold=0.65):
     resume_skills = [uri_to_label[uri] for uri in resume_skill_uris if uri in uri_to_label]
     jd_skills = [uri_to_label[uri] for uri in jd_skill_uris if uri in uri_to_label]
+    
+    if not resume_skills or not jd_skills:
+        return [], []
+    
     resume_embeddings = model.encode(resume_skills)
     jd_embeddings = model.encode(jd_skills)
     skill_gap = []
