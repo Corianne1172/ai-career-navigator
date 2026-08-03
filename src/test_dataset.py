@@ -1,3 +1,10 @@
+"""
+One-off dataset exploration script: downloads and inspects the structure
+(columns, sample rows, category counts) of the Kaggle resume dataset and
+job description dataset used in Phase 1 to identify which columns/fields
+are usable for the project.
+"""
+
 import kagglehub
 import pandas as pd
 import os
@@ -7,13 +14,13 @@ print(path)
 
 for file in os.listdir(path):
     print(file)
-    
+
 for file in os.listdir(path):
     full = path + "/" + file
     print(full)
     if os.path.isdir(full):
         print(os.listdir(full)[:5])
-        
+
 df = pd.read_csv(path + "/Resume/Resume.csv")
 print(df.shape)
 print(df.columns.tolist())
@@ -27,7 +34,7 @@ print(path_jd)
 
 for file in os.listdir(path_jd):
     print(file)
-    
+
 df_jd = pd.read_csv(path_jd + "/job_dataset.csv")
 print(df_jd.shape)
 print(df_jd.columns.tolist())

@@ -1,3 +1,12 @@
+"""
+Validates the full scoring pipeline against real PDF resumes from the
+INFORMATION-TECHNOLOGY category of the Kaggle resume dataset, using the
+project's own PDF extraction pipeline rather than the dataset's pre-
+extracted CSV text (which was found to use a lossier extraction method
+that broke section detection entirely). Resume varies across a batch;
+job description stays constant.
+"""
+
 import pandas as pd
 import os
 from sentence_transformers import SentenceTransformer
@@ -9,7 +18,21 @@ from matcher import (compute_skill_gap, compute_skills_score, compute_experience
                       compute_education_score, compute_composite_score)
 from config import RESUME_HEADER_MAP, JD_KEYWORD_MAP
 
+
 def run_pipeline_on_resume(resume_text, jd_text, jd_sections, model, kp, label_map):
+    """
+    Run the full scoring pipeline (skills, experience, education,
+    composite) for one resume against the fixed job description, catching
+    and logging errors per stage instead of crashing the whole batch if a
+    single resume causes a failure.
+
+    resume_text: full raw resume text for this specific resume.
+    jd_text: full raw job description text (constant across the batch).
+    jd_sections: pre-split JD sections (computed once outside the loop).
+    model: SentenceTransformer used for all embedding-based comparisons.
+    kp: FlashText KeywordProcessor for ESCO skill extraction.
+    label_map: dict mapping ESCO conceptUri to display label.
+    """
     errors = []
 
     try:
@@ -56,6 +79,7 @@ def run_pipeline_on_resume(resume_text, jd_text, jd_sections, model, kp, label_m
         "errors": errors
     }
 
+
 if __name__ == "__main__":
     model = SentenceTransformer("all-MiniLM-L6-v2")
 
@@ -64,6 +88,8 @@ if __name__ == "__main__":
     kp = build_flashtext_index(keyword_index)
     label_map = uri_to_label(keyword_index)
 
+    # Job description stays constant across the batch, so it's split once
+    # outside the loop rather than repeated per resume.
     jd_text = load_job_description("../data/Testing/AI_Intern_job_description.txt")
     jd_sections = split_jd_sections(jd_text, JD_KEYWORD_MAP)
 
@@ -84,6 +110,9 @@ if __name__ == "__main__":
         results.append(result)
         print(f"{filename}: composite={result['composite_score']:.2f} band={result['band']} errors={result['errors']}")
 
+    # Spot-check two specific resumes that showed a large score gap
+    # despite similar skills sub-scores, used to diagnose the section
+    # segmentation header-mismatch issue in Week 7.
     for r in results:
         if r['filename'] in ['40018190.pdf', '52246737.pdf']:
             print(f"\n--- {r['filename']} ---")

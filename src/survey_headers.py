@@ -1,3 +1,10 @@
+"""
+One-off investigation script: surveys the first 15 lines of 10 sample
+resumes from every category in the resume dataset, to identify real-world
+section header phrasing not yet covered in RESUME_HEADER_MAP (config.py).
+Output was manually reviewed to expand header synonym coverage in Week 8.
+"""
+
 import os
 
 resume_root = "../data/archive/data/data"

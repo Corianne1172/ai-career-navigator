@@ -1,3 +1,14 @@
+"""
+Validates the full scoring pipeline against live job postings from the
+Adzuna API, rather than the static test JD used elsewhere. Reuses the
+same resume throughout and scores it against each live posting returned
+for a search query.
+
+Note: this validates that the pipeline works correctly on live data, but
+the live-search flow itself is not yet wired into the Streamlit app,
+users currently must paste a JD manually. See Future Improvements.
+"""
+
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 from llama_cpp import Llama
@@ -9,7 +20,22 @@ from matcher import (compute_skill_gap, compute_skills_score, compute_experience
 from config import RESUME_HEADER_MAP, JD_KEYWORD_MAP
 from job_api import search_jobs
 
+
 def run_pipeline_on_jd(resume_text, resume_sections, jd_text, model, kp, label_map):
+    """
+    Run the full scoring pipeline (skills, experience, education,
+    composite) for one resume against one job description, catching and
+    logging errors per stage instead of crashing the whole batch if a
+    single posting causes a failure.
+
+    resume_text: full raw resume text.
+    resume_sections: pre-split resume sections (computed once outside the
+        loop, since the resume doesn't change between jobs).
+    jd_text: raw job description text for this specific posting.
+    model: SentenceTransformer used for all embedding-based comparisons.
+    kp: FlashText KeywordProcessor for ESCO skill extraction.
+    label_map: dict mapping ESCO conceptUri to display label.
+    """
     errors = []
 
     try:
@@ -54,6 +80,7 @@ def run_pipeline_on_jd(resume_text, resume_sections, jd_text, model, kp, label_m
         "errors": errors
     }
 
+
 if __name__ == "__main__":
     model = SentenceTransformer("all-MiniLM-L6-v2")
 
@@ -62,6 +89,8 @@ if __name__ == "__main__":
     kp = build_flashtext_index(keyword_index)
     label_map = uri_to_label(keyword_index)
 
+    # Resume and its sections only need to be computed once, since they
+    # don't change across the batch of job postings.
     resume_text = extract_text_from_pdf("../data/Testing/OtiohKonan_Resume_AI_June2026.pdf")
     resume_sections = split_resume_sections(resume_text, RESUME_HEADER_MAP)
 
@@ -87,7 +116,10 @@ if __name__ == "__main__":
     print(f"Total tested: {len(results_df)}")
     print(f"Jobs with errors: {(results_df['errors'].apply(len) > 0).sum()}")
     print(f"Composite score range: {results_df['composite_score'].min():.2f} - {results_df['composite_score'].max():.2f}")
-    
+
+    # Inspect raw description lengths: revealed Adzuna's free-tier API
+    # truncates every description to ~500 characters, explaining the low
+    # scores above (see report for full discussion).
     for i, job in enumerate(jobs):
         desc = job.get("description", "")
         print(f"[{i}] {job.get('title')} — {len(desc)} chars")
