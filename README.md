@@ -5,13 +5,14 @@ An AI-powered tool that matches student resumes to job postings, identifies skil
 It differs from existing resume-matching tools through:
 - Gap analysis identifying what's missing from a student's profile for their target roles, with concrete next steps
 - Tailored interview prep questions generated from the student's specific resume and target job description
-- (Stretch goal) H-1B sponsorship likelihood prediction based on role type, company size, and other available signals
+- Course recommendations tied directly to identified skill gaps
+- (Stretch goal, not implemented) H-1B sponsorship likelihood prediction
 
 ## Status
 
-Phase 1 (complete): resume parsing, baseline embedding match, ChromaDB vector store, live job data via Adzuna API.
+Complete: resume/JD parsing and section segmentation, ESCO-based skill extraction, semantic skill gap matching, composite scoring (skills, experience, education sub-scores), Phi-3 Mini-generated gap analysis and interview questions, course recommendations, and a full Streamlit interface tying every feature together.
 
-Phase 2 (in progress): skill extraction pivoted from prompt-based (Phi-3 Mini) to taxonomy-based matching using the [ESCO skills database](https://esco.ec.europa.eu/en/use-esco/download), with FlashText for fast keyword matching. Semantic matching pipeline (embeddings + composite scoring) is next.
+Validated against real PDF resumes (Kaggle resume dataset, multiple categories) and live job postings (Adzuna API). See the final report for detailed findings, including known limitations.
 
 ## Setup
 
@@ -25,20 +26,39 @@ pip install -r requirements.txt
 
 ESCO data is not tracked in this repo due to file size. Download the CSV bundle (English) from the [ESCO download page](https://esco.ec.europa.eu/en/use-esco/download) and place `skills_en.csv` and `skillsHierarchy_en.csv` in `data/ESCO/`.
 
+To use live job search, create a `.env` file in the project root with Adzuna API credentials:
+```
+ADZUNA_APP_ID=your_app_id
+ADZUNA_APP_KEY=your_app_key
+```
+
+## Running the app
+
+```bash
+cd src
+streamlit run app.py
+```
+
+Upload a resume PDF, paste a job description, and click Analyze to see the full match report.
+
 ## Project structure
 
 ```
 ai-career-navigator/
 ├── src/
-│   ├── parser.py           # resume/JD text extraction
-│   ├── matcher.py          # embedding-based matching
-│   ├── skill_extractor.py  # ESCO-based skill extraction
-│   ├── job_api.py          # Adzuna API integration
-│   └── test_dataset.py     # dataset loading/testing
+│   ├── app.py                  # Streamlit interface
+│   ├── parser.py                # resume/JD text extraction and section segmentation
+│   ├── skill_extractor.py       # ESCO-based skill extraction
+│   ├── matcher.py               # semantic matching, composite scoring, gap report, interview questions
+│   ├── course_recommender.py    # course recommendations for skill gaps
+│   ├── job_api.py               # Adzuna live job search integration
+│   ├── config.py                # shared header/keyword mappings
+│   ├── validate_pipeline.py     # pipeline validation against real resume dataset
+│   ├── validate_live_jobs.py    # pipeline validation against live Adzuna postings
+│   └── survey_headers.py        # header-pattern survey across resume dataset categories
 ├── data/
-│   ├── ESCO/                # skills taxonomy (not tracked, see Setup)
-│   └── Testing/              # sample resume/JD for testing
-├── notebooks/                 # exploratory notebooks
+│   ├── ESCO/                    # skills taxonomy (not tracked, see Setup)
+│   └── Testing/                 # sample resume/JD for testing
 ├── requirements.txt
 └── README.md
 ```
