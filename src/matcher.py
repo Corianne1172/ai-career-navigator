@@ -1,13 +1,23 @@
 # import chromadb
 import pandas as pd
+import os
 import re
 from sentence_transformers import SentenceTransformer
 from sentence_transformers.util import cos_sim
 from parser import extract_text_from_pdf, load_job_description, split_resume_sections, split_jd_sections
 from skill_extractor import build_keyword_index, build_flashtext_index, uri_to_label, extract_esco_skills_fast
-from llama_cpp import Llama
+from groq import Groq
 from config import RESUME_HEADER_MAP, JD_KEYWORD_MAP
+from dotenv import load_dotenv
+load_dotenv(dotenv_path="../.env")
 
+def load_llm():
+    """
+    Initialize the Groq API client for LLM-based generation (gap reports,
+    interview questions). Replaces local Phi-3 Mini inference, which
+    cannot run within Streamlit Community Cloud's 1GB RAM limit.
+    """
+    return Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 def compute_skill_gap(resume_skill_uris, jd_skill_uris, uri_to_label, model, threshold=0.65):
     """
@@ -215,8 +225,12 @@ Missing skills: {gap_list_text}
 
 Advice:"""
 
-    response = llm.create_completion(prompt, max_tokens=200, stop=["<|assistant|>", "<|end|>", "<|user|>"])
-    return response["choices"][0]["text"].strip()
+    response = llm.chat.completions.create(
+        model="openai/gpt-oss-20b",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=500,
+    )
+    return response.choices[0].message.content.strip()
 
 
 def generate_interview_questions(matched_skills, skill_gap, llm, num_questions=5):
@@ -248,11 +262,13 @@ Write a numbered list of {num_questions} interview questions. Mix technical ques
 
 Questions:"""
 
-    response = llm.create_completion(prompt, max_tokens=700, stop=["<|assistant|>", "<|end|>", "<|user|>"])
-    text = response["choices"][0]["text"].strip()
+    response = llm.chat.completions.create(
+        model="openai/gpt-oss-20b",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=1000,
+    )
+    text = response.choices[0].message.content.strip()
 
-    # Extract each numbered item and keep only the first num_questions,
-    # discarding anything the model generates past that point.
     matches = re.findall(r'\d+\.\s.*?(?=\n\d+\.|\Z)', text, re.DOTALL)
     trimmed = matches[:num_questions]
     return "\n\n".join(m.strip() for m in trimmed)
@@ -304,7 +320,7 @@ if __name__ == "__main__":
 
     # Gap report and interview questions (Phi-3 Mini)
     model_path = "/Users/otiohkonan/.cache/huggingface/hub/models--microsoft--Phi-3-mini-4k-instruct-gguf/snapshots/a64113399c2f6b8ad3e11c394733a2ddadaa7f33/Phi-3-mini-4k-instruct-q4.gguf"
-    llm = Llama(model_path=model_path, n_ctx=4096, n_gpu_layers=-1, verbose=False)
+    llm = load_llm()
 
     gap_report = generate_gap_report(skill_gap, llm)
     print("Gap report:", gap_report)

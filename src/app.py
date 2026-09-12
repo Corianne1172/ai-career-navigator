@@ -10,13 +10,12 @@ report on one page.
 import streamlit as st
 import pandas as pd
 from sentence_transformers import SentenceTransformer
-from llama_cpp import Llama
 
 from parser import extract_text_from_pdf, split_resume_sections, split_jd_sections
 from skill_extractor import build_keyword_index, build_flashtext_index, extract_esco_skills_fast, uri_to_label
 from matcher import (compute_skill_gap, compute_skills_score, compute_experience_score,
                       compute_education_score, compute_composite_score, generate_gap_report,
-                      generate_interview_questions)
+                      generate_interview_questions, load_llm)
 from course_recommender import build_course_index, recommend_courses
 from config import RESUME_HEADER_MAP, JD_KEYWORD_MAP
 
@@ -33,10 +32,8 @@ def load_model():
 
 
 @st.cache_resource
-def load_llm():
-    """Load and cache the local Phi-3 Mini model used for gap report and interview question generation."""
-    model_path = "/Users/otiohkonan/.cache/huggingface/hub/models--microsoft--Phi-3-mini-4k-instruct-gguf/snapshots/a64113399c2f6b8ad3e11c394733a2ddadaa7f33/Phi-3-mini-4k-instruct-q4.gguf"
-    return Llama(model_path=model_path, n_ctx=4096, n_gpu_layers=-1, verbose=False)
+def get_llm():
+    return load_llm()
 
 
 @st.cache_data
@@ -63,7 +60,7 @@ if st.button("Analyze") and resume_file and jd_text:
     with st.spinner("Analyzing..."):
         # Load all cached resources for this run.
         model = load_model()
-        llm = load_llm()
+        llm = get_llm()
         keyword_index = load_esco_index()
         kp = build_flashtext_index(keyword_index)
         label_map = uri_to_label(keyword_index)
