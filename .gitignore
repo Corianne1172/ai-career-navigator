@@ -7,3 +7,4 @@ __pycache__/
 data/archive
 data/ESCO/esco_embeddings_all_labels.npy
 data/ESCO/esco_uri_map.npy
+data/ESCO/skillsHierarchy_en.csv
