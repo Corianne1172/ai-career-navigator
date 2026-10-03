@@ -24,6 +24,9 @@ from config import RESUME_HEADER_MAP, JD_KEYWORD_MAP
 from dotenv import load_dotenv
 load_dotenv(dotenv_path="../.env")
 
+from pathlib import Path
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 # The functions below are cached so expensive setup (loading the sentence
 # transformer, loading Phi-3 Mini, building the ~13,000-skill ESCO index,
@@ -56,16 +59,16 @@ def get_llm():
 
 @st.cache_data
 def load_esco_index():
-    """Load and cache the ESCO skills dataset as a keyword index for skill extraction."""
-    df = pd.read_csv("../data/ESCO/skills_en.csv")
+    #Load and cache the ESCO skills dataset as a keyword index for skill extraction.
+    df = pd.read_csv(BASE_DIR / "data" / "ESCO" / "skills_en.csv")
     keyword_index = build_keyword_index(df)
     return keyword_index
 
 
 @st.cache_data
 def load_course_index():
-    """Load and cache the course dataset used for course recommendations."""
-    df = pd.read_csv("../data/Online_Courses.csv")
+    #Load and cache the course dataset used for course recommendations.
+    df = pd.read_csv(BASE_DIR / "data" / "Online_Courses.csv")
     return build_course_index(df)
 
 
