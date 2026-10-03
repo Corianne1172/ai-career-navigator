@@ -4,6 +4,4 @@ __pycache__/
 *.pyc
 .env
 .DS_Store
-data/ESCO/
-data/Online_Courses.csv
 data/archive
