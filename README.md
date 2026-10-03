@@ -2,6 +2,8 @@
 
 An AI-powered tool that matches student resumes to job postings, identifies skill gaps, and generates tailored interview prep. Built for CS 497 (Special Projects) at Illinois Tech.
 
+**Live demo:** https://ai-career-navigator-djx7gzrrwru9rrc833mmzt.streamlit.app
+
 It differs from existing resume-matching tools through:
 - Gap analysis identifying what's missing from a student's profile for their target roles, with concrete next steps
 - Tailored interview prep questions generated from the student's specific resume and target job description
@@ -10,7 +12,7 @@ It differs from existing resume-matching tools through:
 
 ## Status
 
-Complete: resume/JD parsing and section segmentation, ESCO-based skill extraction, semantic skill gap matching, composite scoring (skills, experience, education sub-scores), Phi-3 Mini-generated gap analysis and interview questions, course recommendations, and a full Streamlit interface tying every feature together.
+Complete and deployed: resume/JD parsing and section segmentation, ESCO-based skill extraction, semantic skill gap matching, composite scoring (skills, experience, education sub-scores), LLM-generated gap analysis and interview questions (via Groq API), course recommendations, and a full Streamlit interface tying every feature together.
 
 Validated against real PDF resumes (Kaggle resume dataset, multiple categories) and live job postings (Adzuna API). See the final report for detailed findings, including known limitations.
 
@@ -24,13 +26,16 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-ESCO data is not tracked in this repo due to file size. Download the CSV bundle (English) from the [ESCO download page](https://esco.ec.europa.eu/en/use-esco/download) and place `skills_en.csv` and `skillsHierarchy_en.csv` in `data/ESCO/`.
+ESCO data is not tracked in this repo due to file size. Download the CSV bundle (English) from the [ESCO download page](https://esco.ec.europa.eu/en/use-esco/download) and place `skills_en.csv` in `data/ESCO/`.
 
-To use live job search, create a `.env` file in the project root with Adzuna API credentials:
+Create a `.env` file in the project root with a Groq API key (used for gap analysis and interview question generation) and, optionally, Adzuna API credentials (used for live job search):
 ```
+GROQ_API_KEY=your_groq_api_key
 ADZUNA_APP_ID=your_app_id
 ADZUNA_APP_KEY=your_app_key
 ```
+
+A free Groq API key can be created at [console.groq.com](https://console.groq.com).
 
 ## Running the app
 
