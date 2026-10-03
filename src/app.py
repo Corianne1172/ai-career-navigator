@@ -7,6 +7,8 @@ a resume PDF and pastes a job description, and receives a full match
 report on one page.
 """
 
+import os
+
 import streamlit as st
 import pandas as pd
 from sentence_transformers import SentenceTransformer
@@ -19,6 +21,9 @@ from matcher import (compute_skill_gap, compute_skills_score, compute_experience
 from course_recommender import build_course_index, recommend_courses
 from config import RESUME_HEADER_MAP, JD_KEYWORD_MAP
 
+from dotenv import load_dotenv
+load_dotenv(dotenv_path="../.env")
+
 
 # The functions below are cached so expensive setup (loading the sentence
 # transformer, loading Phi-3 Mini, building the ~13,000-skill ESCO index,
@@ -27,13 +32,26 @@ from config import RESUME_HEADER_MAP, JD_KEYWORD_MAP
 
 @st.cache_resource
 def load_model():
-    """Load and cache the sentence-transformer model used for all embedding-based matching."""
+    #Load and cache the sentence-transformer model used for all embedding-based matching.
     return SentenceTransformer("all-MiniLM-L6-v2")
+
+def get_secret(key):
+    
+    # Retrieve a secret/API key, checking Streamlit Cloud's secrets store
+    # first (used when deployed), falling back to environment variables
+    # (used for local development via .env).
+    
+    try:
+        if key in st.secrets:
+            return st.secrets[key]
+    except FileNotFoundError:
+        pass
+    return os.getenv(key)
 
 
 @st.cache_resource
 def get_llm():
-    return load_llm()
+    return load_llm(get_secret("GROQ_API_KEY"))
 
 
 @st.cache_data

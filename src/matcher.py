@@ -11,13 +11,11 @@ from config import RESUME_HEADER_MAP, JD_KEYWORD_MAP
 from dotenv import load_dotenv
 load_dotenv(dotenv_path="../.env")
 
-def load_llm():
-    """
-    Initialize the Groq API client for LLM-based generation (gap reports,
-    interview questions). Replaces local Phi-3 Mini inference, which
-    cannot run within Streamlit Community Cloud's 1GB RAM limit.
-    """
-    return Groq(api_key=os.getenv("GROQ_API_KEY"))
+def load_llm(api_key):
+    
+    #Initialize the Groq API client for LLM-based generation (gap reports, interview questions). Replaces local Phi-3 Mini inference, which cannot run within Streamlit Community Cloud's 1GB RAM limit.
+    
+    return Groq(api_key=api_key)
 
 def compute_skill_gap(resume_skill_uris, jd_skill_uris, uri_to_label, model, threshold=0.65):
     """
