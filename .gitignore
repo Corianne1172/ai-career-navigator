@@ -5,3 +5,5 @@ __pycache__/
 .env
 .DS_Store
 data/archive
+data/ESCO/esco_embeddings_all_labels.npy
+data/ESCO/esco_uri_map.npy
